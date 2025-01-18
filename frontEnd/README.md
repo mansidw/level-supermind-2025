@@ -1,1 +1,0 @@
-Supermind Hackathon FrontEnd
