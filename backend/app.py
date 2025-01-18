@@ -52,75 +52,73 @@ def health():
 def processData():
     if request.method == "POST":
         isVideo = request.form.get("isVideo")
+        content = request.form.get("content")
+        email = request.form.get("email")
+
         required_languages = {}
         required_languages_list = [
             item.strip() for item in request.form.get("required_languages").split(",")
         ]
         for i in required_languages_list:
             required_languages[i] = INDIAN_LANGUAGES[i]
+
         translator = VideoTranscriptionTranslator(GOOGLE_API_KEY)
         # check is the user inputted a text content/file
         final_resp = {}
-        if isVideo == "true":
-            file = request.files.getlist("files")
-            filename = ""
-            print(request.files, "....")
-            for f in file:
-                print(f.filename)
-                filename = secure_filename(f.filename)
-                print(allowedFile(filename))
-                if allowedFile(filename):
-                    f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-                else:
-                    return jsonify({"message": "File type not allowed"}), 400
-                video_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-                print(video_path)
-                try:
-                    results = asyncio.run(
-                        translator.process_video(video_path, required_languages)
-                    )
-                    final_resp["original_transcript"] = results["original_transcript"]
+        rawInputId = str(uuid.uuid4())
+        raw_input = db["raw_input"]
 
-                    for language, data in results["translations"].items():
-                        print(f"\n{language}:")
-                        final_resp[language] = [
-                            data["gemini_translation"],
-                            data["metrics"]["bleu"],
-                            data["metrics"]["rouge1"],
-                            data["metrics"]["rouge2"],
-                            data["metrics"]["rougeL"],
-                            data["metrics"]["cosine_similarity_with_ground_truth"],
-                        ]
+        translate = db["translate"]
+        results = asyncio.run(
+            translator.translate_text_transcript(required_languages, content)
+        )
+        final_resp["original_transcript"] = results["original_transcript"]
 
-                    if os.path.exists(video_path):
-                        os.remove(video_path)
-                    else:
-                        print(f"File {video_path} does not exist.")
-                except Exception as e:
-                    print(f"An error occurred: {str(e)}")
-                    return jsonify({"status": f"error encountered - {e}"})
-
-            return jsonify({"data": final_resp, "status": "success"})
-        else:
-            print("not a video")
-            content = request.form.get("content")
-            results = asyncio.run(
-                translator.translate_text_transcript(required_languages, content)
+        raw_input.insert_one(
+            {
+                "id": rawInputId,
+                "useremail": email,
+                "content": content,
+                "type": "video" if isVideo == "true" else "text",
+            }
+        )
+        allTranslationIds = []
+        for language, data in results["translations"].items():
+            print(f"\n{language}:")
+            translateId = str(uuid.uuid4())
+            final_resp[language] = [
+                data["gemini_translation"],
+                data["metrics"]["bleu"],
+                data["metrics"]["rouge1"],
+                data["metrics"]["rouge2"],
+                data["metrics"]["rougeL"],
+                data["metrics"]["cosine_similarity_with_ground_truth"],
+            ]
+            translate.insert_one(
+                {
+                    "id": translateId,
+                    "inpid": rawInputId,
+                    "lang": language,
+                    "content": data["gemini_translation"],
+                    "bleuscore": data["metrics"]["bleu"],
+                    "rouge1": data["metrics"]["rouge1"],
+                    "rouge2": data["metrics"]["rouge2"],
+                    "rougel": data["metrics"]["rougeL"],
+                    "cosinesimilarity": data["metrics"][
+                        "cosine_similarity_with_ground_truth"
+                    ],
+                }
             )
-            final_resp["original_transcript"] = results["original_transcript"]
+            allTranslationIds.append(translateId)
 
-            for language, data in results["translations"].items():
-                print(f"\n{language}:")
-                final_resp[language] = [
-                    data["gemini_translation"],
-                    data["metrics"]["bleu"],
-                    data["metrics"]["rouge1"],
-                    data["metrics"]["rouge2"],
-                    data["metrics"]["rougeL"],
-                    data["metrics"]["cosine_similarity_with_ground_truth"],
-                ]
-
-            return jsonify({"data": final_resp, "status": "success"})
+        return jsonify(
+            {
+                "data": final_resp,
+                "status": "success",
+                "rawInputId": rawInputId,
+                "translateId": allTranslationIds,
+            }
+        )
 
 
 @app.route("/transcribe-video", methods=["POST"])
@@ -144,6 +142,7 @@ def transcribeVideo():
             try:
                 audio_path = translator.extract_audio(video_path)
                 transcript = translator.transcribe_audio(audio_path)
+
                 os.remove(audio_path)
                 if os.path.exists(video_path):
                     os.remove(video_path)
@@ -161,7 +160,7 @@ def transcribeVideo():
 
 
 # Route to insert a new user
-@app.route('/insert_user', methods=['POST'])
+@app.route("/insert_user", methods=["POST"])
 def insert_user():
     try:
         # Get JSON data from request
@@ -172,52 +171,99 @@ def insert_user():
         password = data.get("password")
 
         user = db["user"]
-        
+
         # Validate required fields
         if not user_id or not name or not email or not password:
             return jsonify({"error": "name, email, and password are required"}), 400
 
         # Hash the password
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        hashed_password = bcrypt.hashpw(
+            password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
 
-        
-        user.insert_one({"user_id": user_id, "email": email, "name": name, "password": hashed_password})
+        user.insert_one(
+            {
+                "user_id": user_id,
+                "email": email,
+                "name": name,
+                "password": hashed_password,
+            }
+        )
 
-        return jsonify({"message": "User inserted successfully", "email": email, "user_id": user_id }), 201
+        return (
+            jsonify(
+                {
+                    "message": "User inserted successfully",
+                    "email": email,
+                    "user_id": user_id,
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
         print(f"Error inserting user: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/login', methods=['POST'])
+@app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
-    
-    if not all(k in data for k in ['email', 'password']):
-        return jsonify({'message': 'Missing required fields'}), 400
-    
+
+    if not all(k in data for k in ["email", "password"]):
+        return jsonify({"message": "Missing required fields"}), 400
+
     # Get user from database
-    user = db['user']
-    result = user.find_one({'email': email})
-    
-    if not result or not bcrypt.checkpw(password.encode('utf-8'), result['password'].encode('utf-8')):
-        return jsonify({'message': 'Invalid credentials'}), 401
-    
+    user = db["user"]
+    result = user.find_one({"email": email})
+
+    if not result or not bcrypt.checkpw(
+        password.encode("utf-8"), result["password"].encode("utf-8")
+    ):
+        return jsonify({"message": "Invalid credentials"}), 401
+
     # Generate JWT token
-    token = jwt.encode({
-        'email': result['email'],
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-    },  os.getenv("APP_SECRET_KEY"), algorithm="HS256")
-    
-    return jsonify({
-        'message': 'Login successful',
-        'token': token,
-        'email': email,
-        'user_id': result['user_id']
-    }), 200
+    token = jwt.encode(
+        {
+            "email": result["email"],
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
+        },
+        os.getenv("APP_SECRET_KEY"),
+        algorithm="HS256",
+    )
+
+    return (
+        jsonify(
+            {
+                "message": "Login successful",
+                "token": token,
+                "email": email,
+                "user_id": result["user_id"],
+            }
+        ),
+        200,
+    )
+
+
+@app.route("/get-translated", methods=["GET"])
+def getTranslatedData():
+    data = request.get_json()
+    id = data.get("id")
+
+    # Get user from database
+    translate = db["translate"]
+    result = translate.find_one({"id": id})
+
+    if not result:
+        return jsonify({"message": "Entry not found"}), 400
+
+    return (
+        jsonify({"data": result, "status": "success"}),
+        200,
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True)
