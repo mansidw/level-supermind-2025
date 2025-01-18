@@ -33,7 +33,7 @@ class VideoTranscriptionTranslator:
         Initialize the translator with Google API key
         """
         os.environ["GOOGLE_API_KEY"] = google_api_key
-        self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0)
+        self.llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=0)
         self.recognizer = sr.Recognizer()
         self.scorer = rouge_scorer.RougeScorer(
             ["rouge1", "rouge2", "rougeL"], use_stemmer=True
