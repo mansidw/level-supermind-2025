@@ -1,4 +1,3 @@
 export const Home = () => {
-    
-    return <>This is React</> 
-}
+  return <>This is React</>;
+};
