@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
@@ -19,14 +20,20 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex w-full items-center justify-center min-h-screen bg-gray-100">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="flex w-full flex-row justify-center"
       >
-        <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <Image
+          src="/register.png"
+          width={500}
+          height={500}
+          alt="Login image"
+        />
+        <Card className="w-1/3 bg-white shadow-lg rounded-lg overflow-hidden">
           <CardHeader className="bg-gray-50 border-b border-gray-200 p-6">
             <CardTitle className="text-2xl font-semibold text-center text-gray-900">Register</CardTitle>
           </CardHeader>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Edit2, Trash2, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -24,33 +24,45 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 
-const initialBlogs = [
-  {
-    id: 1,
-    title: 'My First Blog',
-    content: 'This is the content of my first blog post.',
-    languages: ['English', 'Hindi', 'Marathi'],
-    published: true,
-  },
-  {
-    id: 2,
-    title: 'Travel Adventures',
-    content: 'Exploring the world one step at a time.',
-    languages: ['English', 'French', 'Spanish'],
-    published: true,
-  },
-  {
-    id: 3,
-    title: 'Cooking Tips',
-    content: 'Learn to cook like a pro with these simple tips.',
-    languages: ['English', 'Italian', 'Japanese'],
-    published: false,
-  },
-]
+// Sample function to fetch user's blogs
+const fetchUserBlogs = async () => {
+  // In a real application, this would be an API call
+  return [
+    {
+      id: 1,
+      title: 'My First Blog',
+      content: 'This is the content of my first blog post.',
+      languages: ['English', 'Hindi', 'Marathi'],
+      published: true,
+    },
+    {
+      id: 2,
+      title: 'Travel Adventures',
+      content: 'Exploring the world one step at a time.',
+      languages: ['English', 'French', 'Spanish'],
+      published: true,
+    },
+    {
+      id: 3,
+      title: 'Cooking Tips',
+      content: 'Learn to cook like a pro with these simple tips.',
+      languages: ['English', 'Italian', 'Japanese'],
+      published: false,
+    },
+  ]
+}
 
 export default function Dashboard() {
-  const [blogs, setBlogs] = useState(initialBlogs)
-  const [editingBlog, setEditingBlog] = useState<typeof initialBlogs[0] | null>(null)
+  const [blogs, setBlogs] = useState<any[]>([])
+  const [editingBlog, setEditingBlog] = useState<any | null>(null)
+
+  useEffect(() => {
+    const loadBlogs = async () => {
+      const data = await fetchUserBlogs()
+      setBlogs(data)
+    }
+    loadBlogs()
+  }, [])
 
   const handleDelete = (id: number) => {
     setBlogs(blogs.filter(blog => blog.id !== id))
@@ -62,7 +74,7 @@ export default function Dashboard() {
     ))
   }
 
-  const handleEdit = (blog: typeof initialBlogs[0]) => {
+  const handleEdit = (blog: any) => {
     setEditingBlog(blog)
   }
 
