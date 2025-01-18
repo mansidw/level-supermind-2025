@@ -11,6 +11,7 @@ import os
 import jwt
 import datetime
 import uuid
+from blog import insert_blog, get_user_blog
 
 load_dotenv()
 ALLOWED_EXTENSIONS = set(["mp4", "mov"])
@@ -246,6 +247,13 @@ def login():
         200,
     )
 
+@app.route('/insertBlog', methods=['POST'])
+def insertBlog():
+    return insert_blog(request)
+
+@app.route('/fetchUserBlogs', methods=['POST'])
+def fetchUserBlogs():
+    return get_user_blog(request)
 
 @app.route("/get-translated", methods=["GET"])
 def getTranslatedData():
