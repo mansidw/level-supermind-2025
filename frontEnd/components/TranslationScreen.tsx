@@ -1,45 +1,62 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import axios from 'axios';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { motion } from 'framer-motion'
+} from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 
-const translateText = async (language: string) => {
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000))
-  return `Translated text for ${language}`
-}
+// Sample function for translation API call
+const translateText = async (text: string, language: string) => {
+  try {
+    const response = await axios.post('/api/translate', { text, language });
+    return response.data.translatedText;
+  } catch (error) {
+    console.error('Translation error:', error);
+    return `Error translating to ${language}`;
+  }
+};
 
 export default function TranslationScreen() {
-  const [translations, setTranslations] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState<Record<string, boolean>>({})
-  const router = useRouter()
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams(); // Next.js hook for accessing query params
 
-  const selectedLanguages = ['Hindi', 'Marathi', 'Gujarati']
+  const originalText = 'This is the original text to be translated.';
 
   useEffect(() => {
-    selectedLanguages.forEach(async (language) => {
-      setLoading(prev => ({ ...prev, [language]: true }))
-      const translatedText = await translateText(language)
-      setTranslations(prev => ({ ...prev, [language]: translatedText }))
-      setLoading(prev => ({ ...prev, [language]: false }))
-    })
-  }, [])
+    // Parse selectedLanguages from query params
+    const selectedLanguagesParam = searchParams.get('selectedLanguages');
+    const languages = selectedLanguagesParam
+      ? selectedLanguagesParam.split(',')
+      : [];
+    setSelectedLanguages(languages);
+
+    // Trigger translations for each selected language
+    languages.forEach(async (language) => {
+      setLoading((prev) => ({ ...prev, [language]: true }));
+      const translatedText = await translateText(originalText, language);
+      setTranslations((prev) => ({ ...prev, [language]: translatedText }));
+      setLoading((prev) => ({ ...prev, [language]: false }));
+    });
+  }, [searchParams]); // Re-run effect when query parameters change
 
   const handlePublish = (language: string) => {
-    console.log(`Publishing ${language} translation`)
-  }
+    console.log(`Publishing ${language} translation`);
+  };
 
   const handleViewDashboard = () => {
-    router.push('/dashboard')
-  }
+    router.push('/dashboard');
+  };
 
   return (
     <motion.div
@@ -70,8 +87,8 @@ export default function TranslationScreen() {
                       <Button
                         size="sm"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          handlePublish(language)
+                          e.stopPropagation();
+                          handlePublish(language);
                         }}
                         className="ml-2 bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
                       >
@@ -101,6 +118,5 @@ export default function TranslationScreen() {
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }
-

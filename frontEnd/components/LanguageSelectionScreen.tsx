@@ -25,8 +25,11 @@ export default function LanguageSelectionScreen() {
   }
 
   const handleTranslate = () => {
-    router.push('/translation')
-  }
+    const query = new URLSearchParams({
+      selectedLanguages: selectedLanguages.join(','),
+    })
+    router.push(`/translation?${query.toString()}`)
+  };
 
   return (
     <motion.div
