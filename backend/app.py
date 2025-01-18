@@ -255,5 +255,23 @@ def insertBlog():
 def fetchUserBlogs():
     return get_user_blog(request)
 
+@app.route("/get-translated", methods=["GET"])
+def getTranslatedData():
+    data = request.get_json()
+    id = data.get("id")
+
+    # Get user from database
+    translate = db["translate"]
+    result = translate.find_one({"id": id})
+
+    if not result:
+        return jsonify({"message": "Entry not found"}), 400
+
+    return (
+        jsonify({"data": result, "status": "success"}),
+        200,
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
