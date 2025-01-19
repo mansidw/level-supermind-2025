@@ -32,7 +32,7 @@ export default function FileUploadScreen() {
         // The field name must match what your backend expects: "files"
         formData.append('files', uploadedFile)
         
-        const response = await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/transcribe-video`, formData, {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/transcribe-video`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -43,7 +43,7 @@ export default function FileUploadScreen() {
         
         if (response.data.data) {
           setFileContent(response.data.data)
-          localStorage.setItem('lang_text', response.data.data)
+          if (typeof window !== 'undefined') {localStorage.setItem('lang_text', response.data.data)}
         } else if (response.data.status.includes('error')) {
           throw new Error(response.data.status)
         } else {
@@ -61,7 +61,7 @@ export default function FileUploadScreen() {
       reader.onload = (e) => {
         const content = e.target?.result as string
         setFileContent(content)
-        localStorage.setItem('lang_text', content)
+        if (typeof window !== 'undefined') {localStorage.setItem('lang_text', content)}
       }
       reader.onerror = () => {
         setError('Failed to read file. Please try again.')

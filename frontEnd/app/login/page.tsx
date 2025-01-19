@@ -31,16 +31,16 @@ export default function LoginPage() {
       // Verify that the response contains the expected data
       if (response.data && response.data.token) {
         // Store the data safely
-        localStorage.setItem('token', response.data.token)
+        if (typeof window !== 'undefined') {localStorage.setItem('token', response.data.token)}
         
         // Only store user_id if it exists and is valid
         if (response.data.user_id) {
-          localStorage.setItem('user_id', String(response.data.user_id))
+          if (typeof window !== 'undefined') {localStorage.setItem('user_id', String(response.data.user_id))}
         }
         
         // Only store email if it exists
         if (response.data.email) {
-          localStorage.setItem('email', response.data.email)
+          if (typeof window !== 'undefined') {localStorage.setItem('email', response.data.email)}
         }
 
         // Verify the data was stored correctly
@@ -62,9 +62,10 @@ export default function LoginPage() {
       )
       
       // Clear any potentially partial data from localStorage
+      if (typeof window !== 'undefined') {
       localStorage.removeItem('token')
       localStorage.removeItem('user_id')
-      localStorage.removeItem('email')
+      localStorage.removeItem('email')}
     } finally {
       setIsLoading(false)
     }
