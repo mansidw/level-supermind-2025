@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input'
 
 interface TranslationMetrics {
   [key: string]: [
@@ -41,6 +42,7 @@ export default function TranslationScreen() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [inputTitle, setInputTitle] = useState('');
 
   const translateText = async (languages: string[]) => {
     try {
@@ -52,7 +54,7 @@ export default function TranslationScreen() {
       formData.append('email', localStorage.getItem('email') || '');
 
       const response = await axios.post<TranslationResponse>(
-        'http://127.0.0.1:5000/process-data',
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/process-data`,
         formData,
         {
           headers: {
@@ -94,8 +96,19 @@ export default function TranslationScreen() {
   }, [searchParams]);
 
   const handlePublish = (language: string) => {
-    console.log(`Publishing ${language} translation`, translations?.translateId);
-  };
+    console.log(translations?.rawInputId)
+    axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/insertBlog`, {
+      email: localStorage.getItem('email'),
+      blog_id: translations?.rawInputId,
+      blogText: localStorage.getItem('lang_text'),
+      blogTitle: inputTitle,
+      publish: true,
+      language: language
+    }).then((response) => {
+      alert(`${inputTitle} Published Successfully in ${language}`);
+    })
+    .catch((error) => { });
+    };
 
   const handleViewDashboard = () => {
     router.push('/dashboard');
@@ -136,7 +149,15 @@ export default function TranslationScreen() {
               {error}
             </div>
           )}
-          
+          <Input
+            id="email"
+            type="email"
+            value={inputTitle}
+            onChange={(e) => setInputTitle(e.target.value)}
+            required
+            className="premium-input mt-1"
+            disabled={isLoading}
+          />
           {translations?.data.original_transcript && (
             <div className="mb-6 p-4 bg-gray-50 rounded-md">
               <h3 className="text-sm font-medium text-gray-500 mb-2">Original Text:</h3>
@@ -178,8 +199,8 @@ export default function TranslationScreen() {
                         </div>
                         <div className="grid grid-cols-2 gap-4 mt-4">
                           {data.slice(1).map((metric, idx) => (
-                            <div 
-                              key={idx} 
+                            <div
+                              key={idx}
                               className="bg-white p-3 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200"
                             >
                               <h4 className="text-sm font-medium text-gray-500">{getMetricLabel(idx + 1)}</h4>
@@ -195,7 +216,7 @@ export default function TranslationScreen() {
                 </motion.div>
               ))}
           </Accordion>
-          
+
           <Button
             onClick={handleViewDashboard}
             className="premium-button w-full mt-6"
