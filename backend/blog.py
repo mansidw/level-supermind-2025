@@ -114,11 +114,44 @@ def get_blog(req):
     try:
         data = req.get_json()
         blog_id = data.get('blog_id')
+        email = data.get('email')
+        language = data.get('language')
 
         blog = db["blog"]
-        result = blog.find_one({"blog_id": blog_id})
+        result = blog.find_one({"blog_id": blog_id, "email": email, "language": language})
 
         return jsonify(result), 200
     except Exception as e:
         print(f"Error getting blog: {e}")
+        return jsonify({"error": str(e)}), 500
+
+def update_blog(req):
+    try:
+        data = req.get_json()
+        email = data.get('email')
+        blog_id = data.get('blog_id')
+        blogtext = data.get('blogText')
+        blogtitle = data.get('blogTitle') 
+        publish = True if data.get('publish') else False
+        language = data.get('language')
+
+        url = url_generator(blogtitle)
+        labels = classify_blog_labels(blogtext)
+        print(f"Labels: {labels}")
+        
+        blog = db["blog"]
+        blog.update_one({"blog_id": blog_id, "email": email, "language": language}, 
+        {
+            "$set": {
+                "blogtext": blogtext,
+                "blogtitle": blogtitle,
+                "publish": publish,
+                "labels": labels
+            }
+        })
+
+        return jsonify({"message": "Blog updated successfully", "email": email, "blog_id": blog_id }), 201
+
+    except Exception as e:
+        print(f"Error updating blog: {e}")
         return jsonify({"error": str(e)}), 500
