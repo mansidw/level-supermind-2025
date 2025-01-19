@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Edit2, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Edit2, Trash2, Eye, EyeOff, BarChart } from 'lucide-react'
 
 // Import all UI components
 import { Button } from '@/components/ui/button'
@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { motion, AnimatePresence } from 'framer-motion'
+import BlogAnalytics from './BlogAnalytics'
 
 // API Functions
 const fetchUserBlogs = async (email) => {
@@ -108,8 +109,9 @@ export default function Dashboard() {
   const [blogContent, setBlogContent] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingContent, setIsLoadingContent] = useState(false)
+  const [showAnalytics, setShowAnalytics] = useState(null);
   const { toast } = useToast()
-  
+
   // Replace with actual user email
   const userEmail = localStorage.getItem('email')
   // Initial Load
@@ -262,9 +264,9 @@ export default function Dashboard() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
+                          <Button
+                            variant="outline"
+                            size="icon"
                             className="text-gray-700 hover:text-blue-600"
                             onClick={() => handleEdit(blog)}
                           >
@@ -298,8 +300,23 @@ export default function Dashboard() {
                           >
                             View
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setShowAnalytics(blog)}
+                            className="text-gray-700 hover:text-purple-600"
+                          >
+                            <BarChart className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
+                      {showAnalytics && (
+                        <BlogAnalytics
+                          blog={showAnalytics}
+                          isOpen={!!showAnalytics}
+                          onClose={() => setShowAnalytics(null)}
+                        />
+                      )}
                     </motion.tr>
                   ))}
                 </TableBody>
@@ -382,7 +399,7 @@ export default function Dashboard() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {isLoadingContent ? (
                   <div className="text-center py-4">Loading content...</div>
                 ) : blogContent ? (
