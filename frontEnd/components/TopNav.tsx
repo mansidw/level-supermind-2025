@@ -36,7 +36,7 @@ export function TopNav() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="text-xl font-semibold text-gray-900">
-                Multilingual Blog
+               <span className='text-xl'>भाषाबंधु</span>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

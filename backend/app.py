@@ -121,29 +121,36 @@ def processData():
             }
         )
 
-
 @app.route("/transcribe-video", methods=["POST"])
 def transcribeVideo():
     if request.method == "POST":
+        # Create temp directory if it doesn't exist
+        if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+            os.makedirs(app.config["UPLOAD_FOLDER"])
+
         translator = VideoTranscriptionTranslator(GOOGLE_API_KEY)
         file = request.files.getlist("files")
         filename = ""
         print(request.files, "....")
         transcript = ""
+        
         for f in file:
             print(f.filename)
             filename = secure_filename(f.filename)
             print(allowedFile(filename))
             if allowedFile(filename):
-                f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                f.save(file_path)
             else:
                 return jsonify({"message": "File type not allowed"}), 400
+                
             video_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             print(video_path)
             try:
                 audio_path = translator.extract_audio(video_path)
                 transcript = translator.transcribe_audio(audio_path)
 
+                # Clean up files
                 os.remove(audio_path)
                 if os.path.exists(video_path):
                     os.remove(video_path)
@@ -151,6 +158,9 @@ def transcribeVideo():
                     print(f"File {video_path} does not exist.")
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
+                # Clean up any remaining files even if there's an error
+                if os.path.exists(video_path):
+                    os.remove(video_path)
                 return jsonify({"status": f"error encountered - {e}"})
 
         return jsonify(
@@ -158,7 +168,6 @@ def transcribeVideo():
         )
     else:
         return jsonify({"status": "Method not allowed"})
-
 
 # Route to insert a new user
 @app.route("/insert_user", methods=["POST"])

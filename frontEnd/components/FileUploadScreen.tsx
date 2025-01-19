@@ -12,16 +12,59 @@ import axios from 'axios'
 export default function FileUploadScreen() {
   const [file, setFile] = useState<File | null>(null)
   const [fileContent, setFileContent] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0]
-    if (uploadedFile) {
-      setFile(uploadedFile)
+    if (!uploadedFile) return
+
+    setFile(uploadedFile)
+    setError('')
+    
+    if (uploadedFile.type.startsWith('video/')) {
+      // Handle video file
+      setIsLoading(true)
+      try {
+        const formData = new FormData()
+        console.log("Uploaded file: ", uploadedFile)
+        // The field name must match what your backend expects: "files"
+        formData.append('files', uploadedFile)
+        
+        const response = await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/transcribe-video`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          // Add these options to handle larger files
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+        })
+        
+        if (response.data.data) {
+          setFileContent(response.data.data)
+          localStorage.setItem('lang_text', response.data.data)
+        } else if (response.data.status.includes('error')) {
+          throw new Error(response.data.status)
+        } else {
+          throw new Error('Transcription failed')
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to transcribe video. Please try again.')
+        console.error('Transcription error:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    } else {
+      // Handle text file
       const reader = new FileReader()
       reader.onload = (e) => {
-        setFileContent(e.target?.result as string)
-        localStorage.setItem('lang_text', e.target?.result as string)
+        const content = e.target?.result as string
+        setFileContent(content)
+        localStorage.setItem('lang_text', content)
+      }
+      reader.onerror = () => {
+        setError('Failed to read file. Please try again.')
       }
       reader.readAsText(uploadedFile)
     }
@@ -48,6 +91,7 @@ export default function FileUploadScreen() {
                   variant="outline"
                   className="w-40 h-40 flex flex-col items-center justify-center text-gray-600 hover:text-gray-900 hover:border-gray-400 transition-all duration-300 ease-in-out"
                   onClick={() => document.getElementById('fileInput')?.click()}
+                  disabled={isLoading}
                 >
                   <FileText size={32} />
                   <span className="mt-2 text-sm">Upload Text</span>
@@ -58,6 +102,7 @@ export default function FileUploadScreen() {
                   variant="outline"
                   className="w-40 h-40 flex flex-col items-center justify-center text-gray-600 hover:text-gray-900 hover:border-gray-400 transition-all duration-300 ease-in-out"
                   onClick={() => document.getElementById('videoInput')?.click()}
+                  disabled={isLoading}
                 >
                   <Video size={32} />
                   <span className="mt-2 text-sm">Upload Video</span>
@@ -78,7 +123,18 @@ export default function FileUploadScreen() {
               className="hidden"
               onChange={handleFileUpload}
             />
-            {file && (
+            {isLoading && (
+              <div className="text-center text-gray-600">
+                <p>Transcribing video... Please wait...</p>
+                <p className="text-sm text-gray-500">This may take a few minutes depending on the video length</p>
+              </div>
+            )}
+            {error && (
+              <div className="text-center text-red-600">
+                {error}
+              </div>
+            )}
+            {file && !isLoading && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -94,7 +150,11 @@ export default function FileUploadScreen() {
                   placeholder="Edit your content here..."
                   className="premium-input min-h-[200px]"
                 />
-                <Button onClick={handleProceed} className="premium-button w-full">
+                <Button 
+                  onClick={handleProceed} 
+                  className="premium-button w-full"
+                  disabled={!fileContent}
+                >
                   Proceed
                 </Button>
               </motion.div>
@@ -105,4 +165,3 @@ export default function FileUploadScreen() {
     </motion.div>
   )
 }
-
