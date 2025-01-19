@@ -32,7 +32,7 @@ export default function FileUploadScreen() {
         // The field name must match what your backend expects: "files"
         formData.append('files', uploadedFile)
         
-        const response = await axios.post('http://127.0.0.1:5000/transcribe-video', formData, {
+        const response = await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/transcribe-video`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

@@ -37,7 +37,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 // API Functions
 const fetchUserBlogs = async (email) => {
   try {
-    const response = await axios.post('http://127.0.0.1:5000/fetchUserBlogs', {
+    const response = await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/fetchUserBlogs`, {
       email: email
     }, {
       headers: {
@@ -53,7 +53,7 @@ const fetchUserBlogs = async (email) => {
 
 const fetchBlogContent = async (email, blogId, language) => {
   try {
-    const response = await axios.post('http://127.0.0.1:5000/getBlog', {
+    const response = await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/getBlog`, {
       email: email,
       blog_id: blogId,
       language: language
@@ -71,7 +71,7 @@ const fetchBlogContent = async (email, blogId, language) => {
 
 const deleteBlog = async (blogId) => {
   try {
-    const response = await axios.delete(`http://127.0.0.1:5000/deleteBlog/${blogId}`)
+    const response = await axios.delete(`${NEXT_PUBLIC_BACKEND_URL}/deleteBlog/${blogId}`)
     return response.data
   } catch (error) {
     console.error('Error deleting blog:', error)
@@ -81,7 +81,7 @@ const deleteBlog = async (blogId) => {
 
 const updateBlog = async (blogId, blogData) => {
   try {
-    const response = await axios.put(`http://127.0.0.1:5000/updateBlog/${blogId}`, blogData)
+    const response = await axios.put(`${NEXT_PUBLIC_BACKEND_URL}/updateBlog/${blogId}`, blogData)
     return response.data
   } catch (error) {
     console.error('Error updating blog:', error)
@@ -91,7 +91,7 @@ const updateBlog = async (blogId, blogData) => {
 
 const toggleBlogPublish = async (blogId) => {
   try {
-    const response = await axios.post(`http://127.0.0.1:5000/togglePublish/${blogId}`)
+    const response = await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/togglePublish/${blogId}`)
     return response.data
   } catch (error) {
     console.error('Error toggling blog publish status:', error)
