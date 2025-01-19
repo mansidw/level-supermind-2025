@@ -1,34 +1,66 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
+
+// Define a type for the user state
+type User = {
+  token?: string;
+  user_id?: string;
+  email?: string;
+} | null;
 
 export function TopNav() {
   const pathname = usePathname()
-  const [user, setUser] = useState<{ token?: string; user_id?: string; email?: string }>({})
+  const router = useRouter()
+  const [user, setUser] = useState<User>(null)
 
+  // Add a function to check authentication status
+  const checkAuth = () => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token')
+      if (token) {
+        setUser({
+          token,
+          user_id: localStorage.getItem('user_id') ?? undefined,
+          email: localStorage.getItem('email') ?? undefined,
+        })
+      } else {
+        setUser(null)
+      }
+    }
+  }
+
+  // Check auth status on mount and when localStorage changes
   useEffect(() => {
-    if (localStorage.getItem('token')) {
-      setUser({
-        token: localStorage.getItem('token') ?? undefined,
-        user_id: localStorage.getItem('user_id') ?? undefined,
-        email: localStorage.getItem('email') ?? undefined,
-      })
+    checkAuth()
+    
+    // Add event listener for storage changes
+    window.addEventListener('storage', checkAuth)
+    
+    // Custom event listener for auth changes
+    window.addEventListener('authChange', checkAuth)
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth)
+      window.removeEventListener('authChange', checkAuth)
     }
   }, [])
 
-  function logout() {
+  const logout = () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user_id');
-      localStorage.removeItem('email');
+      localStorage.removeItem('token')
+      localStorage.removeItem('user_id')
+      localStorage.removeItem('email')
+      
+      // Dispatch custom event to notify of auth change
+      window.dispatchEvent(new Event('authChange'))
+      
+      setUser(null)
+      router.push('/login')
     }
-    const router = useRouter();
-    router.push('/login');
-    setUser({});
   }
 
   return (
@@ -38,7 +70,7 @@ export function TopNav() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="text-xl font-semibold text-gray-900">
-               <span className='text-xl'>भाषाबंधु</span>
+                <span className='text-xl'>भाषाबंधु</span>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -65,12 +97,12 @@ export function TopNav() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {user.email ? (
+            {user?.email ? (
               <>
-              <span className="text-gray-700">{user.email}</span>
-              <Button asChild className="ml-4" onClick={logout}>
-                <span>Logout</span> 
-              </Button>
+                <span className="text-gray-700">{user.email}</span>
+                <Button className="ml-4" onClick={logout}>
+                  Logout
+                </Button>
               </>
             ) : (
               <>
