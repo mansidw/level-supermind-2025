@@ -88,7 +88,7 @@ def transform_blogs(blog_list):
         if blog_id not in transformed_blogs:
             transformed_blogs[blog_id] = transformed_blog
         else:
-            transformed_blogs[blog_id][language].append(blog["language"])
+            transformed_blogs[blog_id]["language"].append(blog["language"])
     return transformed_blogs
 
 
