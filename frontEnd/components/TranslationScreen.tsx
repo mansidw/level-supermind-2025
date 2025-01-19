@@ -39,6 +39,7 @@ interface TranslationResponse {
 export default function TranslationScreen() {
   const [translations, setTranslations] = useState<TranslationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [publishingLanguages, setPublishingLanguages] = useState<string[]>([]); // New state for tracking publishing status
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -96,21 +97,25 @@ export default function TranslationScreen() {
     }
   }, [searchParams]);
 
-  const handlePublish = (language: string, translatedText: String) => {
-    console.log(translations?.rawInputId)
-    axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/insertBlog`, {
-      email: localStorage.getItem('email'),
-      blog_id: translations?.rawInputId,
-      blogText: translatedText,
-      blogTitle: inputTitle,
-      publish: true,
-      language: language
-    }).then((response) => {
+  const handlePublish = async (language: string, translatedText: String) => {
+    setPublishingLanguages(current => [...current, language]); // Add language to publishing state
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/insertBlog`, {
+        email: localStorage.getItem('email'),
+        blog_id: translations?.rawInputId,
+        blogText: translatedText,
+        blogTitle: inputTitle,
+        publish: true,
+        language: language
+      });
       setIsPublishDisabled(current => [...current, language]);
       alert(`${inputTitle} Published Successfully in ${language}`);
-    })
-    .catch((error) => { });
-    };
+    } catch (error) {
+      alert('Failed to publish. Please try again.');
+    } finally {
+      setPublishingLanguages(current => current.filter(lang => lang !== language)); // Remove language from publishing state
+    }
+  };
 
   const handleViewDashboard = () => {
     router.push('/dashboard');
@@ -184,7 +189,7 @@ export default function TranslationScreen() {
                       </span>
                       <Button
                         key={language}
-                        disabled={isPublishDisabled.includes(language)}
+                        disabled={isPublishDisabled.includes(language) || publishingLanguages.includes(language)}
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -192,14 +197,21 @@ export default function TranslationScreen() {
                         }}
                         className="ml-2 bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
                       >
-                        Publish
+                        {publishingLanguages.includes(language) ? (
+                          <div className="flex items-center">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Publishing...
+                          </div>
+                        ) : (
+                          'Publish'
+                        )}
                       </Button>
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="p-4 bg-gray-50 rounded-md mt-2 space-y-4">
                         <div>
                           <h3 className="text-sm font-medium text-gray-500 mb-2">Translation:</h3>
-                          <textarea className='w-full p-5 text-gray-800' name="translated_text" id="translated_text" value={data[0]}></textarea>
+                          <textarea className="w-full p-5 text-gray-800" name="translated_text" id="translated_text" value={data[0]}></textarea>
                         </div>
                         <div className="grid grid-cols-2 gap-4 mt-4">
                           {data.slice(1).map((metric, idx) => (
