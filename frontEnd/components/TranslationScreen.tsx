@@ -29,7 +29,7 @@ interface TranslationMetrics {
 interface TranslationResponse {
   data: {
     [key: string]: any[];
-    original_transcript: string;
+    original_transcript: any[];
   };
   rawInputId: string;
   status: string;

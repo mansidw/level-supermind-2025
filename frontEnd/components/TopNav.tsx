@@ -21,9 +21,11 @@ export function TopNav() {
   }, [])
 
   function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('email');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('email');
+    }
     const router = useRouter();
     router.push('/login');
     setUser({});
