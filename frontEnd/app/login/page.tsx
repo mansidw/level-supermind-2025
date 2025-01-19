@@ -27,20 +27,21 @@ export default function LoginPage() {
         email,
         password
       })
-
-      // Verify that the response contains the expected data
+    
       if (response.data && response.data.token) {
-        // Store the data safely
-        if (typeof window !== 'undefined') {localStorage.setItem('token', response.data.token)}
-        
-        // Only store user_id if it exists and is valid
-        if (response.data.user_id) {
-          if (typeof window !== 'undefined') {localStorage.setItem('user_id', String(response.data.user_id))}
-        }
-        
-        // Only store email if it exists
-        if (response.data.email) {
-          if (typeof window !== 'undefined') {localStorage.setItem('email', response.data.email)}
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', response.data.token)
+          
+          if (response.data.user_id) {
+            localStorage.setItem('user_id', String(response.data.user_id))
+          }
+          
+          if (response.data.email) {
+            localStorage.setItem('email', response.data.email)
+          }
+    
+          // Dispatch custom event to notify of auth change
+          window.dispatchEvent(new Event('authChange'))
         }
 
         // Verify the data was stored correctly
@@ -49,13 +50,12 @@ export default function LoginPage() {
         if (!storedToken) {
           throw new Error('Failed to store authentication data')
         }
-
-        // Redirect to dashboard or home page
-        router.push('/dashboard') // or wherever you want to redirect after login
+    
+        router.push('/dashboard')
       } else {
         throw new Error('Invalid response from server')
       }
-    } catch (err) {
+    }  catch (err) {
       setError(
         err instanceof Error
           ? err.message
