@@ -95,12 +95,12 @@ export default function TranslationScreen() {
     }
   }, [searchParams]);
 
-  const handlePublish = (language: string) => {
+  const handlePublish = (language: string, translatedText: String) => {
     console.log(translations?.rawInputId)
     axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/insertBlog`, {
       email: localStorage.getItem('email'),
       blog_id: translations?.rawInputId,
-      blogText: localStorage.getItem('lang_text'),
+      blogText: translatedText,
       blogTitle: inputTitle,
       publish: true,
       language: language
@@ -155,7 +155,7 @@ export default function TranslationScreen() {
             value={inputTitle}
             onChange={(e) => setInputTitle(e.target.value)}
             required
-            className="premium-input mt-1"
+            className="premium-input mt-1 mb-5"
             disabled={isLoading}
           />
           {translations?.data.original_transcript && (
@@ -184,7 +184,7 @@ export default function TranslationScreen() {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handlePublish(language);
+                          handlePublish(language, data[0]);
                         }}
                         className="ml-2 bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
                       >
