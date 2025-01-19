@@ -7,16 +7,24 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import axios from 'axios'
+import { useRouter } from 'next/navigation'
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle registration logic here
-    console.log('Registration attempt with:', { name, email, password })
+    axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/insert_user`, { name, email, password })
+    .then((res) => {
+      console.log(res.data)
+      alert("User registered successfully")
+      router.push('/login')
+    })
+    .catch((err) => console.log(err))
   }
 
   return (

@@ -166,7 +166,7 @@ def insert_user():
     try:
         # Get JSON data from request
         data = request.get_json()
-        user_id = data.get("user_id")
+        user_id = str(uuid.uuid4())
         name = data.get("name")
         email = data.get("email")
         password = data.get("password")

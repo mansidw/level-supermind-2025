@@ -11,8 +11,10 @@ from googletrans import Translator
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-nltk.download("punkt")
-
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
 
 class VideoTranscriptionTranslator:
     INDIAN_LANGUAGES = {
