@@ -43,8 +43,10 @@ export default function LoginPage() {
           // Dispatch custom event to notify of auth change
           window.dispatchEvent(new Event('authChange'))
         }
-    
-        const storedToken = localStorage.getItem('token')
+
+        // Verify the data was stored correctly
+        let storedToken:any = ""
+        if (typeof window !== 'undefined') {storedToken=localStorage.getItem('token')}
         if (!storedToken) {
           throw new Error('Failed to store authentication data')
         }

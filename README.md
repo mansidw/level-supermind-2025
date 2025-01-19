@@ -73,9 +73,11 @@ This project is a blog application with a unique twist. Users can upload text/do
 ## Langflow and Astra DB
 
 Snapshot of Our Langflow Workflow for translations
+
 ![WhatsApp Image 2025-01-19 at 7 36 45 AM (1)](https://github.com/user-attachments/assets/6f104916-6da9-4c84-a077-ec34ef3df981)
 
 Snapshot of blog table of our Database in Astra DB
+
 <img width="956" alt="astraDB" src="https://github.com/user-attachments/assets/e1cc6c9b-471f-4c52-8616-871a01526c90" />
 
 ## Screens and Components
@@ -86,17 +88,30 @@ Snapshot of blog table of our Database in Astra DB
 - **Text File Upload**: Read text from the uploaded file and display it in a textarea for editing.
 - **Proceed Button**: Navigate to the language selection screen.
 
+- <img width="959" alt="Screenshot 2025-01-19 074817" src="https://github.com/user-attachments/assets/7e853cf1-2dcb-4ab0-9a39-e4a5d3ea4a58" />
+
+
 ### 2. Language Selection Screen
 
 - **Checkbox List**: Select languages from [Hindi, Marathi, Gujarati, Tamil, Kannada, Telugu, Bengali, Malayalam, Punjabi, Odia].
 - **Translate Button**: Make a backend API call to translate the text.
 - **Accordion List**: Display the selected languages with loading text. Show the translated text and a "Publish" button once translation is complete.
 
+<img width="960" alt="Screenshot 2025-01-19 075047" src="https://github.com/user-attachments/assets/533a4d4c-03a1-42c9-8ff2-9dd2625fb032" />
+
+![WhatsApp Image 2025-01-19 at 7 58 38 AM](https://github.com/user-attachments/assets/5f9741a2-b261-4a6f-9267-5886dbb0d2aa)
+
+
 ### 3. Dashboard
 
 - **Manage Blogs**: Display all translated and English versions of the blogs.
 - **Options**: Update text, delete the blog, unpublish the blog.
 - **Published Blogs**: Generate URLs to view the blogs.
+![WhatsApp Image 2025-01-19 at 7 59 30 AM](https://github.com/user-attachments/assets/bc2225e8-38f2-4e2e-853c-573977618965)
+
+
+![WhatsApp Image 2025-01-19 at 8 02 11 AM](https://github.com/user-attachments/assets/2e3ffe6c-c17c-4678-aeb9-99b084cf12dd)
+
 
 ## How to Run
 

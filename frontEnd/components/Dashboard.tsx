@@ -113,7 +113,8 @@ export default function Dashboard() {
   const { toast } = useToast()
 
   // Replace with actual user email
-  const userEmail = localStorage.getItem('email')
+  let userEmail:any = ""
+  if (typeof window !== 'undefined') {userEmail=localStorage.getItem('email')}
   // Initial Load
   useEffect(() => {
     const loadBlogs = async () => {
