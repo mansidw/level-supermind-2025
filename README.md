@@ -70,7 +70,13 @@ This project is a blog application with a unique twist. Users can upload text/do
 4. **Engagement**:
    - Measure blog engagement via analytics like unique visitors, language-based readership, and average session duration.
 
+## Langflow and Astra DB
 
+Snapshot of Our Langflow Workflow for translations
+![WhatsApp Image 2025-01-19 at 7 36 45 AM (1)](https://github.com/user-attachments/assets/6f104916-6da9-4c84-a077-ec34ef3df981)
+
+Snapshot of blog table of our Database in Astra DB
+<img width="956" alt="astraDB" src="https://github.com/user-attachments/assets/e1cc6c9b-471f-4c52-8616-871a01526c90" />
 
 ## Screens and Components
 
