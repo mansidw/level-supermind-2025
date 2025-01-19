@@ -44,7 +44,8 @@ export default function LoginPage() {
         }
 
         // Verify the data was stored correctly
-        const storedToken = localStorage.getItem('token')
+        let storedToken:any = ""
+        if (typeof window !== 'undefined') {storedToken=localStorage.getItem('token')}
         if (!storedToken) {
           throw new Error('Failed to store authentication data')
         }

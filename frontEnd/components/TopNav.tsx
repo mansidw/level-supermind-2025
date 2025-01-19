@@ -11,12 +11,14 @@ export function TopNav() {
   const [user, setUser] = useState<{ token?: string; user_id?: string; email?: string }>({})
 
   useEffect(() => {
-    if (localStorage.getItem('token')) {
-      setUser({
-        token: localStorage.getItem('token') ?? undefined,
-        user_id: localStorage.getItem('user_id') ?? undefined,
-        email: localStorage.getItem('email') ?? undefined,
-      })
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('token')) {
+        setUser({
+          token: localStorage.getItem('token') ?? undefined,
+          user_id: localStorage.getItem('user_id') ?? undefined,
+          email: localStorage.getItem('email') ?? undefined,
+        })
+      }
     }
   }, [])
 
