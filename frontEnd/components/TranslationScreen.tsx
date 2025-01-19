@@ -12,51 +12,114 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
-// Sample function for translation API call
-const translateText = async (text: string, language: string) => {
-  try {
-    const response = await axios.post('/api/translate', { text, language });
-    return response.data.translatedText;
-  } catch (error) {
-    console.error('Translation error:', error);
-    return `Error translating to ${language}`;
-  }
-};
+interface TranslationMetrics {
+  [key: string]: [
+    string,    // translated text
+    number,    // BLEU score
+    number,    // ROUGE-1 score
+    number,    // ROUGE-2 score
+    number,    // ROUGE-L score
+    number     // Cosine Similarity
+  ];
+}
+
+interface TranslationResponse {
+  data: {
+    [key: string]: any[];
+    original_transcript: string;
+  };
+  rawInputId: string;
+  status: string;
+  translateId: string[];
+}
 
 export default function TranslationScreen() {
-  const [translations, setTranslations] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [translations, setTranslations] = useState<TranslationResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams(); // Next.js hook for accessing query params
+  const searchParams = useSearchParams();
 
-  const originalText = 'This is the original text to be translated.';
+  const translateText = async (languages: string[]) => {
+    try {
+      setError(null);
+      const formData = new FormData();
+      formData.append('isVideo', 'false');
+      formData.append('required_languages', languages.join(','));
+      formData.append('content', localStorage.getItem('lang_text') || '');
+      formData.append('email', localStorage.getItem('email') || '');
+
+      const response = await axios.post<TranslationResponse>(
+        'http://127.0.0.1:5000/process-data',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.data.status !== 'success') {
+        throw new Error('Translation failed');
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error('Translation error:', error);
+      setError(error instanceof Error ? error.message : 'An error occurred during translation');
+      return null;
+    }
+  };
 
   useEffect(() => {
-    // Parse selectedLanguages from query params
     const selectedLanguagesParam = searchParams.get('selectedLanguages');
     const languages = selectedLanguagesParam
       ? selectedLanguagesParam.split(',')
       : [];
-    setSelectedLanguages(languages);
 
-    // Trigger translations for each selected language
-    languages.forEach(async (language) => {
-      setLoading((prev) => ({ ...prev, [language]: true }));
-      const translatedText = await translateText(originalText, language);
-      setTranslations((prev) => ({ ...prev, [language]: translatedText }));
-      setLoading((prev) => ({ ...prev, [language]: false }));
-    });
-  }, [searchParams]); // Re-run effect when query parameters change
+    const fetchTranslations = async () => {
+      setIsLoading(true);
+      const response = await translateText(languages);
+      if (response) {
+        setTranslations(response);
+      }
+      setIsLoading(false);
+    };
+
+    if (languages.length > 0) {
+      fetchTranslations();
+    }
+  }, [searchParams]);
 
   const handlePublish = (language: string) => {
-    console.log(`Publishing ${language} translation`);
+    console.log(`Publishing ${language} translation`, translations?.translateId);
   };
 
   const handleViewDashboard = () => {
     router.push('/dashboard');
   };
+
+  const getMetricLabel = (index: number) => {
+    const labels = [
+      'Bleu Score',
+      'Rouge1 Score',
+      'Rouge2 Score',
+      'RougeL Score',
+      'Cosine Similarity'
+    ];
+    return labels[index - 1] || `Metric ${index}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <p className="mt-4 text-gray-600">Translating content...</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -68,22 +131,34 @@ export default function TranslationScreen() {
       <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
         <CardContent className="p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Translation Progress</h2>
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-md">
+              {error}
+            </div>
+          )}
+          
+          {translations?.data.original_transcript && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-md">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Original Text:</h3>
+              <p className="text-gray-900">{translations.data.original_transcript}</p>
+            </div>
+          )}
+
           <Accordion type="single" collapsible className="w-full">
-            {selectedLanguages.map((language, index) => (
-              <motion.div
-                key={language}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <AccordionItem value={language}>
-                  <AccordionTrigger className="text-lg font-medium text-gray-700 py-4 border-b">
-                    {language}
-                    {loading[language] ? (
-                      <span className="text-sm font-normal text-gray-500 ml-2">
-                        Translating...
+            {translations && Object.entries(translations.data)
+              .filter(([key]) => key !== 'original_transcript')
+              .map(([language, data], index) => (
+                <motion.div
+                  key={language}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <AccordionItem value={language}>
+                    <AccordionTrigger className="text-lg font-medium text-gray-700 py-4 border-b">
+                      <span className="flex items-center">
+                        {language}
                       </span>
-                    ) : (
                       <Button
                         size="sm"
                         onClick={(e) => {
@@ -94,21 +169,33 @@ export default function TranslationScreen() {
                       >
                         Publish
                       </Button>
-                    )}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="p-4 bg-gray-50 rounded-md mt-2">
-                      {loading[language] ? (
-                        <p className="text-gray-600">Translating...</p>
-                      ) : (
-                        <p className="text-gray-800">{translations[language]}</p>
-                      )}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </motion.div>
-            ))}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="p-4 bg-gray-50 rounded-md mt-2 space-y-4">
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-500 mb-2">Translation:</h3>
+                          <textarea className='w-full p-5 text-gray-800' name="translated_text" id="translated_text" value={data[0]}></textarea>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 mt-4">
+                          {data.slice(1).map((metric, idx) => (
+                            <div 
+                              key={idx} 
+                              className="bg-white p-3 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200"
+                            >
+                              <h4 className="text-sm font-medium text-gray-500">{getMetricLabel(idx + 1)}</h4>
+                              <p className="text-lg font-semibold text-gray-900">
+                                {(metric).toFixed(3)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
+              ))}
           </Accordion>
+          
           <Button
             onClick={handleViewDashboard}
             className="premium-button w-full mt-6"
