@@ -11,17 +11,17 @@ const BlogAnalytics = ({ blog, isOpen, onClose }) => {
   const [timeRange, setTimeRange] = useState('week');
 
   const visitorData = [
-    { date: 'Mon', visitors: 120 },
-    { date: 'Tue', visitors: 150 },
-    { date: 'Wed', visitors: 180 },
-    { date: 'Thu', visitors: 140 },
-    { date: 'Fri', visitors: 160 }
+    { date: 'Mon', visitors: 1 },
+    { date: 'Tue', visitors: 2 },
+    { date: 'Wed', visitors: 5 },
+    { date: 'Thu', visitors: 2 },
+    { date: 'Fri', visitors: 8 }
   ];
 
   const languageData = [
     { language: 'English', users: 450 },
-    { language: 'Spanish', users: 320 },
-    { language: 'French', users: 280 }
+    { language: 'Marathi', users: 320 },
+    { language: 'Hindi', users: 280 }
   ];
 
   return (
@@ -51,7 +51,7 @@ const BlogAnalytics = ({ blog, isOpen, onClose }) => {
                   <Users className="h-4 w-4 text-blue-500" />
                   <div className="ml-2">
                     <p className="text-xs text-gray-500">Total Visitors</p>
-                    <h4 className="text-base font-bold">1,234</h4>
+                    <h4 className="text-base font-bold">12</h4>
                   </div>
                 </div>
               </CardContent>
@@ -63,7 +63,7 @@ const BlogAnalytics = ({ blog, isOpen, onClose }) => {
                   <Timer className="h-4 w-4 text-yellow-500" />
                   <div className="ml-2">
                     <p className="text-xs text-gray-500">Avg. Time</p>
-                    <h4 className="text-base font-bold">4m 32s</h4>
+                    <h4 className="text-base font-bold">1m 32s</h4>
                   </div>
                 </div>
               </CardContent>
