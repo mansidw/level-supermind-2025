@@ -37,7 +37,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 // API Functions
 const fetchUserBlogs = async (email) => {
   try {
-    const response = await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/fetchUserBlogs`, {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fetchUserBlogs`, {
       email: email
     }, {
       headers: {
