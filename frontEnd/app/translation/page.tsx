@@ -3,6 +3,7 @@
 import TranslationScreen from '@/components/TranslationScreen'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 
 export default function Translation() {
   const router = useRouter();
@@ -20,7 +21,9 @@ export default function Translation() {
       <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
         Translation Progress
       </h1>
-      <TranslationScreen />
+      <Suspense fallback={<div>Loading...</div>}>
+        <TranslationScreen />
+      </Suspense>
     </main>
   )
 }
