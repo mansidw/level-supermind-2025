@@ -1,16 +1,8 @@
-# Blog Application
+# BhashaBandhu
 
 This project is a blog application with a unique twist. Users can upload text/doc files or video files, translate the content into multiple languages, and manage their blogs through a dashboard.
 
 ## Features
-
-- Upload text/doc files or video files.
-- Edit the uploaded text.
-- Translate the text into multiple languages.
-- Publish and manage blogs.
-- View all blogs in a dashboard.
-- Update, delete, and unpublish blogs.
-- Generate URLs for published blogs.
 
 ### Input Options
 - **Text Input**:
