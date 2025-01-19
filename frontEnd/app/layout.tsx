@@ -5,7 +5,7 @@ import { TopNav } from '@/components/TopNav'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Multilingual Blog Creator',
+  title: 'Bhasha Bandhu',
   description: 'Create and manage multilingual blog posts with ease',
 }
 

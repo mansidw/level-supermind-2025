@@ -43,6 +43,7 @@ export default function TranslationScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [inputTitle, setInputTitle] = useState('');
+  const [isPublishDisabled, setIsPublishDisabled] = useState<string[]>([]);
 
   const translateText = async (languages: string[]) => {
     try {
@@ -105,6 +106,7 @@ export default function TranslationScreen() {
       publish: true,
       language: language
     }).then((response) => {
+      setIsPublishDisabled(current => [...current, language]);
       alert(`${inputTitle} Published Successfully in ${language}`);
     })
     .catch((error) => { });
@@ -181,6 +183,8 @@ export default function TranslationScreen() {
                         {language}
                       </span>
                       <Button
+                        key={language}
+                        disabled={isPublishDisabled.includes(language)}
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();

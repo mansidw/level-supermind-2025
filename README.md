@@ -1,17 +1,6 @@
-# Blog Application
+# BhashaBandhu
 
 This project is a blog application with a unique twist. Users can upload text/doc files or video files, translate the content into multiple languages, and manage their blogs through a dashboard.
-
-## Features
-
-- Upload text/doc files or video files.
-- Edit the uploaded text.
-- Translate the text into multiple languages.
-- Publish and manage blogs.
-- View all blogs in a dashboard.
-- Update, delete, and unpublish blogs.
-- Generate URLs for published blogs.
-
 
 ## Features
 
@@ -26,20 +15,18 @@ This project is a blog application with a unique twist. Users can upload text/do
   - Transcription results are displayed for user review and editing.
 
 ### Transcription (For Video Content)
-- Automatically converts video speech to text in English using advanced AI Speech-to-Text models such as Google Speech-to-Text or AWS Transcribe.
+- Automatically converts video speech to text in English using advanced AI Speech-to-Text models such as AWS Transcribe.
 - Provides an intuitive interface for users to review and edit the transcription before proceeding to translation.
 
 ### Translation (For Text or Transcribed Content)
 - Translates English content into 10 regional Indian languages:
   - **Hindi, Marathi, Gujarati, Tamil, Kannada, Telugu, Bengali, Malayalam, Punjabi, and Odia**.
-- Uses advanced NLP models such as AWS Translate, Google Cloud Translation, or OpenAI to ensure high-quality translations.
+- Uses advanced NLP models in Google Cloud Translation and OpenAI to ensure high-quality translations.
 - Displays translation accuracy metrics (e.g., BLEU or ROUGE scores) for user transparency.
 
 ### Blog Publishing
 - Converts translations into blog-ready formats for each language.
-- Generates SEO-optimized content with:
-  - Unique URLs for each language version (e.g., `/blog-title-hindi`, `/blog-title-tamil`).
-  - Metadata, structured data, and language tags for improved search engine indexing.
+- Generates SEO-optimized labels, url and metadata for each blobs using Langflow Workflows.
 - Allows users to review and edit blog drafts before publishing.
 
 ### Dynamic Routing & SEO Indexing
@@ -83,9 +70,6 @@ This project is a blog application with a unique twist. Users can upload text/do
 4. **Engagement**:
    - Measure blog engagement via analytics like unique visitors, language-based readership, and average session duration.
 
-5. **Usability**:
-   - Deliver a seamless workflow with an intuitive user interface and minimal errors.
-
 
 
 ## Screens and Components
@@ -110,12 +94,58 @@ This project is a blog application with a unique twist. Users can upload text/do
 
 ## How to Run
 
-1. Clone the repository.
-2. Install the required dependencies.
-3. Set up the environment variables.
-4. Run the backend server.
-5. Open the frontend application.
+#### 1. Clone the repository.
+```
+git clone https://github.com/mansidw/level-supermind-2025.git 
+```
 
+#### 2. Install the required dependencies.
+
+For Frontend 
+
+```
+cd ./frontEnd
+
+npm install
+```
+
+For Backend
+
+```
+cd ./backend
+
+pip install -r requirements.txt
+```
+#### 3. Set up the environment variables.
+
+For Frontend
+
+```
+NEXT_PUBLIC_BACKEND_URL = 'YOUR BACKEND URL'
+```
+
+For Backend
+
+```
+ASTRA_DB_TOKEN = 'YOUR TOKEN'
+ASTRA_DB_ENDPOINT = 'YOUR TOKEN'
+ASTRA_CLIENT_ID = 'YOUR TOKEN'
+ASTRA_CLIENT_SECRET= 'YOUR TOKEN'
+APP_SECRET_KEY = 'YOUR TOKEN'
+GOOGLE_API_KEY = 'YOUR TOKEN'
+
+```
+
+
+#### 4. Run the backend server.
+```
+python app.py
+```
+
+#### 5. Open the frontend application.
+```
+npm run dev
+```
 
 
 ## Technologies Used
