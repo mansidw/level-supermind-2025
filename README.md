@@ -1,7 +1,8 @@
 # BhashaBandhu
 
 Deployed Web App Link - https://level-supermind-2025-ioflbrm3v.vercel.app/
-Yoitube Video Link (Architecture Explaination) - https://www.youtube.com/watch?v=5twHz0jkyp4
+
+Youtube Video Link (Architecture Explaination) - https://www.youtube.com/watch?v=5twHz0jkyp4
 
 This project is a blog application with a unique twist. Users can upload text/doc files or video files, translate the content into multiple languages, and manage their blogs through a dashboard.
 
